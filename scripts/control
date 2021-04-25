@@ -1,0 +1,29 @@
+#!/system/bin/sh
+
+scripts=`realpath $0`
+scripts_path=`dirname ${scripts}`
+
+start_AdGuardHome() {
+    nohup AdGuardHome -w ${scripts_path} > /dev/null 2>&1 &
+    echo -n $! > ${scripts_path}/AdGuardHome.pid
+    chmod 0644 ${scripts_path}/AdGuardHome.pid
+}
+
+stop_AdGuardHome() {
+    kill -15 `cat ${scripts_path}/AdGuardHome.pid`
+    rm -f ${scripts_path}/AdGuardHome.pid
+}
+
+while getopts ":sk" signal ; do
+    case ${signal} in
+        s)
+            start_AdGuardHome
+            ;;
+        k)
+            stop_AdGuardHome
+            ;;
+        ?)
+            echo ""
+            ;;
+    esac
+done

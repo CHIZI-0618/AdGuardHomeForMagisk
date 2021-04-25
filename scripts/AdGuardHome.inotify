@@ -1,0 +1,20 @@
+#!/system/bin/sh
+
+scripts=`realpath $0`
+scripts_dir=`dirname ${scripts}`
+
+events=$1
+monitor_dir=$2
+monitor_file=$3
+
+service_control() {
+    if [ "${monitor_file}" = "disable" ] ; then
+        if [ "${events}" = "d" ] ; then
+            ${scripts_dir}/control -s
+        elif [ "${events}" = "n" ] ; then
+            ${scripts_dir}/control -k
+        fi
+    fi
+}
+
+service_control

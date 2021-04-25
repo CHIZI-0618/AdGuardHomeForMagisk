@@ -1,0 +1,6 @@
+id=AdGuardHome_For_Magisk
+name=AdGuardHome For Magisk
+version=v0.105.2
+versionCode=20210424
+author=Module by CHIZI-0618. Core by AdGuardTeam.
+description=Build AdGuard Home DNS server by Magisk.
