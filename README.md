@@ -5,7 +5,7 @@
 
 ## 配置
 
-安装后重启设备, 浏览器打开`http://127.0.0.1:3000`进行AdGuardHome初始配置. 
+安装后重启设备, 浏览器打开`http://127.0.0.1:3000`进行AdGuardHome初始配置.  
 AdguardHome工作目录为`{modules}/AdGuardHome_For_Magisk/scripts`, 初始配置完成后会在该目录下生成AdGuardHome配置文件AdGuardHome.yaml, 之后更改配置请参照AdguardTeam提供的[WiKi](https://github.com/AdguardTeam/AdGuardHome/wiki/Configuration#configuration-file).
 
 ## 控制
