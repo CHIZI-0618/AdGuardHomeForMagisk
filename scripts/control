@@ -3,15 +3,69 @@
 scripts=`realpath $0`
 scripts_path=`dirname ${scripts}`
 
+busybox_path="/data/adb/magisk/busybox"
+iptables="iptables -w 100"
+AdGuardHome_dir="/data/AdGuardHome"
+
+wait_AdGuardHome_listen() {
+  wait_count=0
+  check="${busybox_path} netstat -nulp | grep AdGuardHome"
+  dns_port=`cat ${AdGuardHome_dir}/AdGuardHome.yaml | grep "^  port:" | cut -d ' ' -f 4`
+  while [ -n "$(${busybox_path} pidof AdGuardHome)" ] && ! eval "${check}" && [ ${wait_count} -lt 100 ] ; do
+    sleep 1 ; wait_count=$((${wait_count} + 1))
+  done
+  if [ -n "$(${busybox_path} pidof AdGuardHome)" ] && eval "${check}" && $(${busybox_path} netstat -nul | grep "${dns_port}" > /dev/null 2>&1) ; then
+    echo "AdGuardHome DNS 端口为${dns_port}" >> ${AdGuardHome_dir}/run.log
+    return 0
+  else
+    return 1
+  fi
+}
+
 start_AdGuardHome() {
-    nohup AdGuardHome -w ${scripts_path} > /dev/null 2>&1 &
-    echo -n $! > ${scripts_path}/AdGuardHome.pid
-    chmod 0644 ${scripts_path}/AdGuardHome.pid
+    [ -n "$(${busybox_path} pidof AdGuardHome)" ] && exit 1
+
+    if [ -f ${AdGuardHome_dir}/AdGuardHome.yaml ] || [ -s ${AdGuardHome_dir}/AdGuardHome.yaml ] ; then
+        rm -f ${AdGuardHome_dir}/check-config.log
+        if $(${AdGuardHome_dir}/AdGuardHome -w ${AdGuardHome_dir} --check-config -l check-config.log > /dev/null 2>&1) ; then
+            mkdir -p ${AdGuardHome_dir}/log
+            ulimit -SHn 1000000
+            ${busybox_path} setuidgid 0:3005 ${AdGuardHome_dir}/AdGuardHome -w ${AdGuardHome_dir} -l ${AdGuardHome_dir}/log/`date +%Y-%m-%d-%H%M%S`.log --pidfile ${AdGuardHome_dir}/AdGuardHome.pid  2>&1 &
+            [ "$?"="0" ] && echo "AdGuardHome启动成功！" > ${AdGuardHome_dir}/run.log
+        fi
+
+        if wait_AdGuardHome_listen ; then
+            dns_port=`cat ${AdGuardHome_dir}/AdGuardHome.yaml | grep "^  port:" | cut -d ' ' -f 4`
+            ${iptables} -t nat -A OUTPUT -m owner --uid-owner 0 --gid-owner 3005 -p udp --dport 53 -j RETURN
+            ${iptables} -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to-ports ${dns_port}
+        fi
+    else
+        rm -rf ${AdGuardHome_dir}/AdGuardHome.yaml
+        rm -f ${AdGuardHome_dir}/install.log
+        echo "AdGuardHome安装" >> ${AdGuardHome_dir}/run.log
+        ${AdGuardHome_dir}/AdGuardHome -w ${AdGuardHome_dir} -l install.log --pidfile ${AdGuardHome_dir}/AdGuardHome.pid > /dev/null 2>&1 &
+
+        while true ; do
+            if [ -f ${AdGuardHome_dir}/install.log ] && $(cat ${AdGuardHome_dir}/install.log | grep "UDP listener" > /dev/null 2>&1) ; then
+            kill -15 `cat ${AdGuardHome_dir}/AdGuardHome.pid 2> /dev/null` || kill -15 `pidof AdGuardHome`
+            rm -f ${AdGuardHome_dir}/AdGuardHome.pid
+            break
+            fi
+        done
+
+        sleep 1
+        start_AdGuardHome
+
+    fi
+
 }
 
 stop_AdGuardHome() {
-    kill -15 `cat ${scripts_path}/AdGuardHome.pid`
-    rm -f ${scripts_path}/AdGuardHome.pid
+    ${iptables} -t nat -D OUTPUT -m owner --uid-owner 0 --gid-owner 3005 -p udp --dport 53 -j RETURN > /dev/null 2>&1
+    ${iptables} -t nat -D OUTPUT -p udp --dport 53 -j REDIRECT --to-ports ${dns_port} > /dev/null 2>&1
+    kill -15 `cat ${AdGuardHome_dir}/AdGuardHome.pid 2> /dev/null` || kill -15 `${busybox_path} pidof AdGuardHome`
+    rm -f ${AdGuardHome_dir}/AdGuardHome.pid
+
 }
 
 while getopts ":sk" signal ; do
