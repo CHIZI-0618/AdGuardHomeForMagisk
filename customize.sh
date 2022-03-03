@@ -37,6 +37,7 @@ local_mod() {
     mkdir -p ${AdGuardHome_dir}
     tar -zxvf ${MODPATH}/Core/AdGuardHome_linux_${ARCH}.tar.gz -C ${MODPATH} >&2
     mv -f ${MODPATH}/AdGuardHome/AdGuardHome ${AdGuardHome_dir}/
+    set_perm ${AdGuardHome_dir}/AdGuardHome 0 3005 0700
     rm -rf ${MODPATH}/Core
     rm -rf ${MODPATH}/AdGuardHome
 }
@@ -89,6 +90,7 @@ online_mod() {
     tar -zxvf ${MODPATH}/AdGuardHome.tar.gz -C ${MODPATH} >&2
     mkdir -p ${AdGuardHome_dir}
     mv -f ${MODPATH}/AdGuardHome/AdGuardHome ${AdGuardHome_dir}/
+    set_perm ${AdGuardHome_dir}/AdGuardHome 0 3005 0700
     rm -rf ${MODPATH}/AdGuardHome
     rm -f ${MODPATH}/AdGuardHome.tar.gz
     rm -rf ${MODPATH}/Core
