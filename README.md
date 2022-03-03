@@ -2,7 +2,11 @@
 
 ## 安装
 
-下载 [Releases](https://github.com/CHIZI-0618/AdGuardHomeForMagisk/releases) 里的发布包, Magisk Manager 选择从本地安装, 安装过程会以音量键选择本地或在线安装 AdGuardHome 内核.
+下载 [Releases](https://github.com/CHIZI-0618/AdGuardHomeForMagisk/releases) 里的发布包, Magisk Manager 选择从本地安装, 安装过程会以音量键选择本地或在线安装 AdGuardHome 内核.  
+  
+
+*Tips:*  
++ Releases 中的压缩包因包含多架构本地内核而体积较大, 如下载困难可考虑使用仅在线安装的版本 [AdGuardHomeForMagisk_Online.zip](https://raw.githubusercontent.com/CHIZI-0618/AdGuardHomeForMagisk/online/AdGuardHomeForMagisk_Online.zip) 大小不足7 KB.
 
 ## 配置
 
