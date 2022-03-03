@@ -17,31 +17,6 @@ fi
 mv -f ${MODPATH}/AdGuardHome_For_Magisk_service.sh /data/adb/service.d/
 set_perm /data/adb/service.d/AdGuardHome_For_Magisk_service.sh 0 0 0700
 
-ui_print "- Select installation mode:"
-ui_print "- Vol Up = Local mod."
-ui_print "- Vol Down = Online mod."
-while true ; do
-    getevent -lc 1 2>&1 | grep KEY_VOLUME > $TMPDIR/events
-    sleep 1
-    if $(cat $TMPDIR/events | grep -q KEY_VOLUMEUP) ; then
-        mod="local"
-        break
-    elif $(cat $TMPDIR/events | grep -q KEY_VOLUMEDOWN) ; then
-        mod="online"
-        break
-    fi
-done
-
-local_mod() {
-    ui_print "- Start local installation."
-    mkdir -p ${AdGuardHome_dir}
-    tar -zxvf ${MODPATH}/Core/AdGuardHome_linux_${ARCH}.tar.gz -C ${MODPATH} >&2
-    mv -f ${MODPATH}/AdGuardHome/AdGuardHome ${AdGuardHome_dir}/
-    set_perm ${AdGuardHome_dir}/AdGuardHome 0 3005 0700
-    rm -rf ${MODPATH}/Core
-    rm -rf ${MODPATH}/AdGuardHome
-}
-
 online_mod() {
     ui_print "- Start online installation."
     AdGuardHome_link="https://github.com/AdguardTeam/AdGuardHome/releases"
@@ -96,28 +71,18 @@ online_mod() {
     rm -rf ${MODPATH}/Core
 }
 
-if [ "${mod}" == "local" ] ; then
-    local_mod
-elif [ "${mod}" == "online" ] ; then
-    online_mod
-else
-    abort "- Selection error."
-fi
+online_mod
 
-if [ "${mod}" == "local" ] ; then
-    break
-elif [ "${mod}" == "online" ] ; then
-    ui_print "- Update module.prop."
-    rm -f ${MODPATH}/module.prop
-    touch ${MODPATH}/module.prop
-    echo "id=AdGuardHome_For_Magisk" > ${MODPATH}/module.prop
-    echo "name=AdGuardHome For Magisk" >> ${MODPATH}/module.prop
-    echo -n "version=" >> ${MODPATH}/module.prop
-    echo ${latest_version} >> ${MODPATH}/module.prop
-    echo "versionCode=$(date +%Y%m%d)" >> ${MODPATH}/module.prop
-    echo "author=Module by CHIZI-0618. Core by AdguardTeam." >> ${MODPATH}/module.prop
-    echo "description=Build AdGuard Home DNS server by Magisk." >> ${MODPATH}/module.prop
-fi
+ui_print "- Update module.prop."
+rm -f ${MODPATH}/module.prop
+touch ${MODPATH}/module.prop
+echo "id=AdGuardHome_For_Magisk" > ${MODPATH}/module.prop
+echo "name=AdGuardHome For Magisk" >> ${MODPATH}/module.prop
+echo -n "version=" >> ${MODPATH}/module.prop
+echo ${latest_version} >> ${MODPATH}/module.prop
+echo "versionCode=$(date +%Y%m%d)" >> ${MODPATH}/module.prop
+echo "author=Module by CHIZI-0618. Core by AdguardTeam." >> ${MODPATH}/module.prop
+echo "description=Build AdGuard Home DNS server by Magisk." >> ${MODPATH}/module.prop
 
 ui_print "- Start setting permissions."
 set_perm_recursive ${MODPATH} 0 0 0755 0644
