@@ -30,6 +30,8 @@ start_AdGuardHome() {
         if $(${AdGuardHome_dir}/AdGuardHome -w ${AdGuardHome_dir} --check-config -l check-config.log > /dev/null 2>&1) ; then
             mkdir -p ${AdGuardHome_dir}/log
             ulimit -SHn 1000000
+            chown -R 0:3005 ${AdGuardHome_dir}/
+            chmod 0700 ${AdGuardHome_dir}/AdGuardHome
             ${busybox_path} setuidgid 0:3005 ${AdGuardHome_dir}/AdGuardHome -w ${AdGuardHome_dir} -l ${AdGuardHome_dir}/log/`date +%Y-%m-%d-%H%M%S`.log --pidfile ${AdGuardHome_dir}/AdGuardHome.pid  2>&1 &
             [ "$?"="0" ] && echo "AdGuardHome启动成功！" > ${AdGuardHome_dir}/run.log
         fi

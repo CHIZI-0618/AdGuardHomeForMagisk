@@ -2,6 +2,8 @@
 
 SKIPUNZIP=1
 
+AdGuardHome_dir="/data/AdGuardHome"
+
 if [ ${BOOTMODE} ! = true ] ; then
     abort "! Please install in Magisk Manager"
 fi
@@ -26,9 +28,9 @@ done
 
 local_mod() {
     ui_print "- Start local installation."
-    mkdir -p ${MODPATH}/system/bin/
+    mkdir -p ${AdGuardHome_dir}
     tar -zxvf ${MODPATH}/Core/AdGuardHome_linux_${ARCH}.tar.gz -C ${MODPATH} >&2
-    mv -f ${MODPATH}/AdGuardHome/AdGuardHome ${MODPATH}/system/bin/
+    mv -f ${MODPATH}/AdGuardHome/AdGuardHome ${AdGuardHome_dir}/
     rm -rf ${MODPATH}/Core
     rm -rf ${MODPATH}/AdGuardHome
 }
@@ -79,8 +81,8 @@ online_mod() {
     fi
 
     tar -zxvf ${MODPATH}/AdGuardHome.tar.gz -C ${MODPATH} >&2
-    mkdir -p ${MODPATH}/system/bin/
-    mv -f ${MODPATH}/AdGuardHome/AdGuardHome ${MODPATH}/system/bin/
+    mkdir -p ${AdGuardHome_dir}
+    mv -f ${MODPATH}/AdGuardHome/AdGuardHome ${AdGuardHome_dir}/
     rm -rf ${MODPATH}/AdGuardHome
     rm -f ${MODPATH}/AdGuardHome.tar.gz
     rm -rf ${MODPATH}/Core
@@ -112,4 +114,3 @@ fi
 ui_print "- Start setting permissions."
 set_perm_recursive ${MODPATH} 0 0 0755 0644
 set_perm_recursive ${MODPATH}/scripts 0 0 0755 0755
-set_perm ${MODPATH}/system/bin/AdGuardHome 0 0 6755
