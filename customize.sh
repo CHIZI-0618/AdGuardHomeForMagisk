@@ -11,6 +11,12 @@ fi
 ui_print "- Extracting module files."
 unzip -o "${ZIPFILE}" -x 'META-INF/*' -d ${MODPATH} >&2
 
+if [ ! -d /data/adb/service.d ] ; then
+  mkdir -p /data/adb/service.d
+fi
+mv -f ${MODPATH}/AdGuardHome_For_Magisk_service.sh /data/adb/service.d/
+set_perm /data/adb/service.d/AdGuardHome_For_Magisk_service.sh 0 0 0700
+
 ui_print "- Select installation mode:"
 ui_print "- Vol Up = Local mod."
 ui_print "- Vol Down = Online mod."
